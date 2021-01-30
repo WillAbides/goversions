@@ -1,4 +1,4 @@
-module github.com/willabides/goproject-tmpl
+module github.com/willabides/goversions
 
 go 1.15
 
