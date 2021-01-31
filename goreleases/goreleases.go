@@ -1,4 +1,7 @@
-package versions
+// Package goreleases builds a more complete version of the release data available at
+// https://golang.org/dl/?mode=json&include=all. The main difference is goreleases
+// included prerelease versions from the past.
+package goreleases
 
 import (
 	"context"
@@ -8,7 +11,6 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
-	"strings"
 	"sync"
 
 	"github.com/killa-beez/gopkgs/pool"
@@ -383,6 +385,10 @@ func getSha(ctx context.Context, name string, sc *storageClient) (string, error)
 	return string(b), nil
 }
 
-func isStable(v string) bool {
-	return !strings.Contains(v, "beta") && !strings.Contains(v, "rc")
+func isStable(version string) bool {
+	var v goVersion
+	if !parseGoVersion(&v, version) {
+		return false
+	}
+	return v.prerelease == ""
 }

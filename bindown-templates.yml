@@ -1,0 +1,8 @@
+templates:
+  goreleases:
+    url: https://github.com/WillAbides/goversions/releases/download/v{{.version}}/goreleases_{{.version}}_{{.os}}_{{.arch}}.tar.gz
+    required_vars:
+    - version
+    systems:
+    - darwin/amd64
+    - linux/amd64
