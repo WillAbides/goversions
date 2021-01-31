@@ -131,24 +131,6 @@ func TestFetchRelease(t *testing.T) {
 	})
 }
 
-func findReleaseFileByName(files []ReleaseFile, name string) (ReleaseFile, bool) {
-	for _, file := range files {
-		if file.Filename == name {
-			return file, true
-		}
-	}
-	return ReleaseFile{}, false
-}
-
-func findReleaseByVersion(releases []Release, version string) (Release, bool) {
-	for _, release := range releases {
-		if release.Version == version {
-			return release, true
-		}
-	}
-	return Release{}, false
-}
-
 func Test_parseGoVersion(t *testing.T) {
 	for _, td := range []struct {
 		version string
@@ -204,4 +186,40 @@ func Test_parseGoVersion(t *testing.T) {
 			require.Equal(t, *td.want, ver)
 		})
 	}
+}
+
+func TestFindConflicts(t *testing.T) {
+	t.Run("no changes", func(t *testing.T) {
+		ctx := context.Background()
+		baseReleases, err := FetchReleases(ctx, &FetchReleasesOptions{
+			HTTPClient:   testHTTPClient(t, "", ""),
+			SkipVersions: []string{"go1.7.2"},
+		})
+		require.NoError(t, err)
+		headReleases, err := FetchReleases(ctx, &FetchReleasesOptions{
+			HTTPClient:   testHTTPClient(t, "", ""),
+			SkipVersions: []string{"go1.7.2"},
+		})
+		require.NoError(t, err)
+		got := FindConflicts(baseReleases, headReleases)
+		require.Empty(t, got)
+	})
+
+	t.Run("missing release", func(t *testing.T) {
+		ctx := context.Background()
+		baseReleases, err := FetchReleases(ctx, &FetchReleasesOptions{
+			HTTPClient:   testHTTPClient(t, "", ""),
+			SkipVersions: []string{"go1.7.2"},
+		})
+		require.NoError(t, err)
+		headReleases, err := FetchReleases(ctx, &FetchReleasesOptions{
+			HTTPClient:   testHTTPClient(t, "", ""),
+			SkipVersions: []string{"go1.7.2"},
+		})
+		require.NoError(t, err)
+		headReleases = headReleases[1:]
+		got := FindConflicts(baseReleases, headReleases)
+		want := []string{`head is missing release "go1.16rc1"`}
+		require.Equal(t, want, got)
+	})
 }

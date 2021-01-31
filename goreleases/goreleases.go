@@ -392,3 +392,21 @@ func isStable(version string) bool {
 	}
 	return v.prerelease == ""
 }
+
+func findReleaseFileByName(files []ReleaseFile, name string) (ReleaseFile, bool) {
+	for _, file := range files {
+		if file.Filename == name {
+			return file, true
+		}
+	}
+	return ReleaseFile{}, false
+}
+
+func findReleaseByVersion(releases []Release, version string) (Release, bool) {
+	for _, release := range releases {
+		if release.Version == version {
+			return release, true
+		}
+	}
+	return Release{}, false
+}
