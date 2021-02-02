@@ -16,6 +16,12 @@ bin/gobin:
 bin/goreleases: gobuildcache
 	go build -ldflags "-s -w" -o $@ ./cmd/goreleases
 
+bin/goversion-select: gobuildcache
+	go build -ldflags "-s -w" -o $@ ./cmd/goversion-select
+
+bin/goversionsaz: gobuildcache
+	go build -ldflags "-s -w" -o $@ ./cmd/goversionsaz
+
 HANDCRAFTED_REV := 082e94edadf89c33db0afb48889c8419a2cb46a9
 bin/handcrafted: bin/gobin
 	GOBIN=${CURDIR}/bin \

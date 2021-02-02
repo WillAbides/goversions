@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"regexp"
 	"sort"
-	"strconv"
 	"sync"
 
 	"github.com/killa-beez/gopkgs/pool"
+	"github.com/willabides/goversions/goversion"
 )
 
 // FetchReleasesOptions options for FetchReleases
@@ -56,6 +56,25 @@ func FetchReleases(ctx context.Context, options *FetchReleasesOptions) ([]Releas
 	return releases, nil
 }
 
+func goVersionLess(a, b string) bool {
+	var invalidA, invalidB bool
+	verA, err := goversion.NewVersion(a)
+	if err != nil {
+		invalidA = true
+	}
+	verB, err := goversion.NewVersion(b)
+	if err != nil {
+		invalidB = true
+	}
+	if invalidB {
+		return false
+	}
+	if invalidA {
+		return true
+	}
+	return verA.LessThan(verB)
+}
+
 // Release is a go release
 type Release struct {
 	Version string        `json:"version"`
@@ -64,10 +83,7 @@ type Release struct {
 }
 
 func (f Release) less(other Release) bool {
-	var fVersion, otherVersion goVersion
-	parseGoVersion(&fVersion, f.Version)
-	parseGoVersion(&otherVersion, other.Version)
-	return fVersion.less(otherVersion)
+	return goVersionLess(f.Version, other.Version)
 }
 
 type releaseSorter []Release
@@ -97,13 +113,10 @@ type ReleaseFile struct {
 
 //nolint:gocritic // I don't want to refactor this to a pointer
 func (f ReleaseFile) less(other ReleaseFile) bool {
-	var fVersion, otherVersion goVersion
-	parseGoVersion(&fVersion, f.Version)
-	parseGoVersion(&otherVersion, other.Version)
-	if fVersion.less(otherVersion) {
+	if goVersionLess(f.Version, other.Version) {
 		return true
 	}
-	if otherVersion.less(fVersion) {
+	if goVersionLess(other.Version, f.Version) {
 		return false
 	}
 	return f.Filename < other.Filename
@@ -203,63 +216,6 @@ type filenameInfo struct {
 	os      string
 	arch    string
 	suffix  string
-}
-
-type goVersion struct {
-	major      int
-	minor      int
-	patch      int
-	prerelease string
-}
-
-func (v goVersion) less(other goVersion) bool {
-	if v.major < other.major {
-		return true
-	}
-	if v.major > other.major {
-		return false
-	}
-	if v.minor < other.minor {
-		return true
-	}
-	if v.minor > other.minor {
-		return false
-	}
-	if v.patch < other.patch {
-		return true
-	}
-	if v.patch > other.patch {
-		return false
-	}
-	if v.prerelease != "" && other.prerelease == "" {
-		return true
-	}
-	if v.prerelease == "" && other.prerelease != "" {
-		return false
-	}
-	return v.prerelease < other.prerelease
-}
-
-const versionPattern = `(\d+)(?:\.(\d+))?(?:\.(\d+))?([[:alnum:]]+)?`
-
-var versionRegexp = regexp.MustCompile(versionPattern)
-
-func parseGoVersion(dst *goVersion, version string) bool {
-	parts := versionRegexp.FindStringSubmatch(version)
-	if len(parts) == 0 {
-		return false
-	}
-	if n, err := strconv.Atoi(parts[1]); err == nil {
-		dst.major = n
-	}
-	if n, err := strconv.Atoi(parts[2]); err == nil {
-		dst.minor = n
-	}
-	if n, err := strconv.Atoi(parts[3]); err == nil {
-		dst.patch = n
-	}
-	dst.prerelease = parts[4]
-	return true
 }
 
 var (
@@ -386,11 +342,11 @@ func getSha(ctx context.Context, name string, sc *storageClient) (string, error)
 }
 
 func isStable(version string) bool {
-	var v goVersion
-	if !parseGoVersion(&v, version) {
+	v, err := goversion.NewVersion(version)
+	if err != nil {
 		return false
 	}
-	return v.prerelease == ""
+	return v.IsStable()
 }
 
 func findReleaseFileByName(files []ReleaseFile, name string) (ReleaseFile, bool) {

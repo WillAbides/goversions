@@ -131,63 +131,6 @@ func TestFetchRelease(t *testing.T) {
 	})
 }
 
-func Test_parseGoVersion(t *testing.T) {
-	for _, td := range []struct {
-		version string
-		want    *goVersion
-	}{
-		{
-			version: `go1.16rc1`,
-			want: &goVersion{
-				major:      1,
-				minor:      16,
-				prerelease: "rc1",
-			},
-		},
-		{
-			version: `1.16rc1`,
-			want: &goVersion{
-				major:      1,
-				minor:      16,
-				prerelease: "rc1",
-			},
-		},
-		{
-			version: `1.16.2`,
-			want: &goVersion{
-				major: 1,
-				minor: 16,
-				patch: 2,
-			},
-		},
-		{
-			version: `go1`,
-			want: &goVersion{
-				major: 1,
-			},
-		},
-		{
-			version: `go2beta1`,
-			want: &goVersion{
-				major:      2,
-				prerelease: "beta1",
-			},
-		},
-	} {
-		t.Run(td.version, func(t *testing.T) {
-			var ver goVersion
-			ok := parseGoVersion(&ver, td.version)
-			if td.want == nil {
-				require.False(t, ok)
-				require.Empty(t, ver)
-				return
-			}
-			require.True(t, ok)
-			require.Equal(t, *td.want, ver)
-		})
-	}
-}
-
 func TestFindConflicts(t *testing.T) {
 	t.Run("no changes", func(t *testing.T) {
 		ctx := context.Background()
