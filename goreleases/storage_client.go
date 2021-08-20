@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -84,7 +85,12 @@ func (c *storageClient) fetchStorageObjects(ctx context.Context) ([]storageObjec
 		if err != nil {
 			return nil, err
 		}
-		objects = append(objects, pg.Items...)
+		for _, item := range pg.Items {
+			if strings.Contains(item.Name, "/") {
+				continue
+			}
+			objects = append(objects, item)
+		}
 		tkn = pg.NextPageToken
 		if tkn == "" {
 			break
