@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 CDPATH="" cd -- "$(dirname -- "$(dirname -- "$0")")"
 
@@ -19,9 +19,7 @@ fi
 mkdir -p ./tmp
 cp ./bindown-templates.yml ./tmp/bindown-templates.yml
 
-for cmd in ./cmd/*; do
-  script/bindown --configfile ./tmp/bindown-templates.yml template update-vars "$(basename "$cmd")" --set version="$version"
-done
+script/bindown --configfile ./tmp/bindown-templates.yml template update-vars goreleases --set version="$version"
 
 tag="v$version"
 
