@@ -5,7 +5,7 @@ interactions:
     body: ""
     form: {}
     headers: {}
-    url: https://golang.org/dl/?mode=json&include=all
+    url: https://go.dev/dl/?mode=json&include=all
     method: GET
   response:
     body: |

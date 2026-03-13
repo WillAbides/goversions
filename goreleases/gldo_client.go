@@ -16,7 +16,7 @@ func (c *gldoClient) fetchReleases(ctx context.Context) ([]Release, error) {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
-	u := `https://golang.org/dl/?mode=json&include=all`
+	u := `https://go.dev/dl/?mode=json&include=all`
 	req, err := http.NewRequestWithContext(ctx, "GET", u, http.NoBody)
 	if err != nil {
 		return nil, err
