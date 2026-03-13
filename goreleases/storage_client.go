@@ -54,7 +54,7 @@ func (c *storageClient) getHTTPClient() *http.Client {
 
 func (c *storageClient) doContentRequest(ctx context.Context, objectName string) (*http.Response, error) {
 	u := fmt.Sprintf(`%s/%s/%s`, c.getBaseURL(), c.getBucket(), objectName)
-	req, err := http.NewRequestWithContext(ctx, "GET", u, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", u, http.NoBody)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *storageClient) fetchStorageObjects(ctx context.Context) ([]storageObjec
 	baseURL := fmt.Sprintf(`%s/storage/v1/b/%s/o?prefix=%s`, c.getBaseURL(), c.getBucket(), c.getPrefix())
 	var objects []storageObject
 	for {
-		req, err := http.NewRequestWithContext(ctx, "GET", baseURL+"&pageToken="+tkn, nil)
+		req, err := http.NewRequestWithContext(ctx, "GET", baseURL+"&pageToken="+tkn, http.NoBody)
 		if err != nil {
 			return nil, err
 		}

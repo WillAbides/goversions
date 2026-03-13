@@ -6,7 +6,7 @@ package goreleases
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"sort"
@@ -330,7 +330,7 @@ func getSha(ctx context.Context, name string, sc *storageClient) (string, error)
 	default:
 		return "", fmt.Errorf("not OK: %s", resp.Status)
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}

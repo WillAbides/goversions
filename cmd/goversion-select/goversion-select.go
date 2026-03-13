@@ -95,7 +95,7 @@ func main() {
 	}
 }
 
-func results(c *goversion.Constraints, max int, versions []*goversion.Version) []string {
+func results(c *goversion.Constraints, maxResults int, versions []*goversion.Version) []string {
 	candidates := make([]*goversion.Version, 0, len(versions))
 	for _, v := range versions {
 		if c.Check(v) {
@@ -103,8 +103,8 @@ func results(c *goversion.Constraints, max int, versions []*goversion.Version) [
 		}
 	}
 	sort.Sort(sort.Reverse(goversion.Collection(candidates)))
-	if max > 0 && max < len(candidates) {
-		candidates = candidates[:max]
+	if maxResults > 0 && maxResults < len(candidates) {
+		candidates = candidates[:maxResults]
 	}
 	result := make([]string, len(candidates))
 	for i, candidate := range candidates {

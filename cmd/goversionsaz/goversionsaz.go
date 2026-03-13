@@ -24,7 +24,12 @@ func main() {
 		versionsSource: "https://raw.githubusercontent.com/WillAbides/goreleases/main/versions.txt",
 	})
 	log.Printf("About to listen on %s. Try http://%s/api/goversion-select?constraint=1.x", listenAddr, listenAddr)
-	log.Fatal(http.ListenAndServe(listenAddr, sMux))
+	server := &http.Server{
+		Addr:              listenAddr,
+		Handler:           sMux,
+		ReadHeaderTimeout: 10 * time.Second,
+	}
+	log.Fatal(server.ListenAndServe())
 }
 
 type goVersionSelectHandler struct {
@@ -69,13 +74,7 @@ func (h *goVersionSelectHandler) ServeHTTP(w http.ResponseWriter, req *http.Requ
 func (h *goVersionSelectHandler) getVersions() ([]*goversion.Version, error) {
 	h.versionsMux.Lock()
 	defer h.versionsMux.Unlock()
-	needsRefresh := false
-	if h.versionsTime.IsZero() {
-		needsRefresh = true
-	}
-	if time.Since(h.versionsTime) > h.versionsMaxAge {
-		needsRefresh = true
-	}
+	needsRefresh := h.versionsTime.IsZero() || time.Since(h.versionsTime) > h.versionsMaxAge
 	if !needsRefresh {
 		return h.versions, nil
 	}

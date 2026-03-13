@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -77,10 +76,10 @@ func TestFetchRelease(t *testing.T) {
 		goldenFile := filepath.FromSlash("testdata/golden/releases.json")
 		if updateGolden != nil && *updateGolden {
 			require.NoError(t, os.MkdirAll(filepath.Dir(goldenFile), 0o700))
-			err = ioutil.WriteFile(goldenFile, encoded, 0o600)
+			err = os.WriteFile(goldenFile, encoded, 0o600)
 			require.NoError(t, err)
 		}
-		want, err := ioutil.ReadFile(goldenFile)
+		want, err := os.ReadFile(goldenFile)
 		require.NoError(t, err)
 		require.Equal(t, string(want), string(encoded))
 	})
