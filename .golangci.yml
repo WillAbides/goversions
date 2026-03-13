@@ -17,6 +17,8 @@ linters:
         - style
         - diagnostic
         - performance
+      disabled-checks:
+        - hugeParam
     gocyclo:
       min-complexity: 15
   exclusions:

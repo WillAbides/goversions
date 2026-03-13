@@ -64,7 +64,6 @@ func TestFetchRelease(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, string(want), string(encoded))
 	})
-
 }
 
 func TestFindConflicts(t *testing.T) {
